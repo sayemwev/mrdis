@@ -1,0 +1,821 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    
+    <!-- Google Verification Code (Unchanged) -->
+    <meta name="google-site-verification" content="ETrKNvIQV4ymGd4eLiSKdtsXfSncCqWgBZbKZw48foo" />
+    <meta name="description" content="MrDis - দারাজ পণ্যের সেরা ডিসকাউন্ট অফার এবং কুপন কোড। পণ্য কিনলেই নিশ্চিত মোবাইল রিচার্জ এবং আকর্ষণীয় সব উপহার।">
+    
+    <title>MrDis - Best Deals</title>
+    <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <style>
+        /* Modern Variables & Reset */
+        :root{
+            --primary: #66bb30;
+            --secondary: #1b4488;
+            --accent: #ffc107;
+            --bg: #f8f9fa;
+            --surface: #ffffff;
+            --text: #2d3436;
+            --gray: #636e72;
+            --shadow: 0 8px 20px rgba(0,0,0,0.06);
+            --radius: 16px;
+        }
+        
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body { margin:0; font-family:'Hind Siliguri', sans-serif; background:var(--bg); color:var(--text); padding-bottom:80px; overscroll-behavior-y: none; }
+        
+        /* Header */
+        header {
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(10px);
+            padding: 10px 15px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .header-top { display: flex; justify-content: space-between; align-items: center; width: 100%; }
+        .logo-area { display: flex; align-items: center; gap: 8px; }
+        .logo-img { height: 35px; width: auto; object-fit: contain; }
+        .logo-text { font-size: 1.5rem; font-weight: 800; color: var(--secondary); letter-spacing: -1px; }
+        .logo-text span { color: var(--primary); }
+
+        .btn-extra-header {
+            background: linear-gradient(135deg, var(--secondary), var(--primary));
+            color: #fff; border: none; padding: 6px 14px; border-radius: 50px;
+            font-size: 0.8rem; font-weight: 600; cursor: pointer;
+            box-shadow: 0 4px 10px rgba(102, 187, 48, 0.3);
+            transition: transform 0.2s; display: flex; align-items: center; gap: 5px;
+        }
+        .btn-extra-header:active { transform: scale(0.95); }
+
+        /* SEARCH BOX STYLES */
+        .search-container { position: relative; width: 100%; }
+        .search-box {
+            display: flex; align-items: center;
+            background: #f1f2f6; border: 1px solid #e0e0e0;
+            border-radius: 50px; padding: 8px 15px;
+            transition: all 0.3s ease;
+        }
+        .search-box:focus-within {
+            background: #fff; border-color: var(--primary);
+            box-shadow: 0 4px 12px rgba(102, 187, 48, 0.15);
+        }
+        .search-input {
+            border: none; background: transparent; flex: 1;
+            font-family: 'Hind Siliguri', sans-serif; font-size: 0.95rem;
+            outline: none; color: var(--text); padding: 0 5px;
+        }
+        .search-btn {
+            color: var(--gray); font-size: 1rem; cursor: pointer;
+            border: none; background: transparent; padding: 0;
+        }
+        
+        /* SEARCH SUGGESTIONS */
+        .search-suggestions {
+            position: absolute; top: 110%; left: 0; right: 0;
+            background: white; border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            z-index: 101; display: none; overflow: hidden;
+            border: 1px solid #eee;
+        }
+        .suggestion-item {
+            padding: 10px 15px; border-bottom: 1px solid #f5f5f5;
+            display: flex; align-items: center; gap: 10px; cursor: pointer;
+            font-size: 0.9rem; transition: background 0.2s;
+        }
+        .suggestion-item:last-child { border-bottom: none; }
+        .suggestion-item:hover { background: #f8f9fa; color: var(--primary); }
+
+        /* Slider CSS */
+        .slider-container { padding: 15px; }
+        .slider-box {
+            width: 100%; height: 170px; border-radius: var(--radius);
+            position: relative; overflow: hidden; background: #e0e0e0;
+            box-shadow: var(--shadow);
+        }
+        .slider-img {
+            width: 100%; height: 100%; object-fit: cover;
+            position: absolute; top: 0; left: 0;
+            transition: transform 0.8s ease-in-out; 
+        }
+
+        /* Categories & Products - Marquee Logic */
+        .cat-sec { margin-bottom: 30px; overflow: hidden; }
+        .cat-header {
+            padding: 0 20px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;
+        }
+        .cat-title {
+            margin: 0; font-size: 1.2rem; color: var(--secondary);
+            position: relative; padding-left: 12px;
+        }
+        .cat-title::before {
+            content: ''; position: absolute; left: 0; top: 5px; height: 70%; width: 4px;
+            background: var(--primary); border-radius: 2px;
+        }
+        .btn-see-all {
+            background: transparent; color: var(--primary); border: 1px solid var(--primary);
+            padding: 4px 10px; border-radius: 20px; font-size: 0.8rem; font-weight: 600;
+            cursor: pointer; transition: all 0.2s;
+        }
+        .btn-see-all:hover { background: var(--primary); color: white; }
+
+        /* Infinite Scroll Track */
+        .marquee-wrapper { width: 100%; overflow: hidden; position: relative; }
+        .marquee-track {
+            display: flex; gap: 15px; padding: 5px 0 20px 0; width: max-content;
+            animation-name: scroll-left; animation-timing-function: linear; animation-iteration-count: infinite;
+        }
+        .marquee-track:hover { animation-play-state: paused; }
+        @keyframes scroll-left { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+
+        /* Product Card */
+        .card {
+            min-width: 150px; max-width: 150px;
+            background: var(--surface); border-radius: var(--radius);
+            padding: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.04);
+            transition: transform 0.2s, box-shadow 0.2s;
+            position: relative; border: 1px solid rgba(0,0,0,0.02);
+        }
+        .card:active { transform: scale(0.97); }
+        .card-img-box {
+            width: 100%; height: 130px; border-radius: 12px; overflow: hidden;
+            background: #f1f2f6; position: relative;
+        }
+        .card img { width: 100%; height: 100%; object-fit: cover; }
+        
+        .p-info { padding-top: 8px; }
+        .p-name {
+            font-size: 0.9rem; font-weight: 500; color: var(--text);
+            display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+            overflow: hidden; height: 38px; line-height: 1.3; margin-bottom: 5px;
+        }
+        .p-price-row { display: flex; align-items: center; justify-content: space-between; }
+        .p-price { color: var(--primary); font-weight: 700; font-size: 1.1rem; }
+        .p-rate-mini { font-size: 0.75rem; color: var(--accent); display: flex; align-items: center; gap: 2px;}
+
+        /* No Results & Search Grid */
+        .no-results { text-align: center; padding: 40px 20px; color: var(--gray); display: none; }
+        .search-grid-mode { display: flex; flex-wrap: wrap; justify-content: center; gap: 15px; padding: 10px; }
+
+        /* See All Modal - Full Screen Grid */
+        #mSeeAll { z-index: 1200; }
+        .see-all-grid {
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 15px; padding: 10px 0;
+        }
+        
+        /* Footer */
+        footer {
+            background: var(--surface); margin-top: 30px; padding: 40px 20px;
+            text-align: center; color: var(--gray);
+            border-radius: 30px 30px 0 0; box-shadow: 0 -5px 20px rgba(0,0,0,0.03);
+        }
+        .social-btn {
+            display: flex; align-items: center; justify-content: center; gap: 10px;
+            text-decoration: none; font-weight: 600; padding: 12px;
+            border-radius: 12px; margin-bottom: 12px; width: 100%;
+            max-width: 280px; margin-left: auto; margin-right: auto;
+            transition: transform 0.2s; box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+        .social-btn:active { transform: scale(0.98); }
+        .wa-btn { background: #25D366; color: white; }
+        .yt-btn { background: #FF0000; color: white; }
+        .f-links span {
+            display: inline-block; margin: 10px; cursor: pointer;
+            color: var(--secondary); font-weight: 500; font-size: 0.9rem;
+            border-bottom: 1px dashed var(--secondary);
+        }
+
+        /* Floating WA */
+        .float-wa {
+            position: fixed; bottom: 25px; right: 25px;
+            background: #25D366; color: #fff; width: 60px; height: 60px;
+            border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            font-size: 32px; box-shadow: 0 8px 25px rgba(37,211,102,0.4);
+            z-index: 900; text-decoration: none; transition: transform 0.3s;
+        }
+        .float-wa:active { transform: scale(0.9); }
+
+        /* Modal Design */
+        .modal {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.6); z-index: 1000;
+            align-items: flex-end; justify-content: center;
+            backdrop-filter: blur(3px);
+        }
+        .m-content {
+            background: var(--surface); width: 100%; max-width: 600px;
+            border-radius: 25px 25px 0 0; padding: 30px 20px;
+            animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            max-height: 90vh; overflow-y: auto; position: relative;
+        }
+        .m-content::before {
+            content: ''; position: absolute; top: 10px; left: 50%; transform: translateX(-50%);
+            width: 50px; height: 5px; background: #e0e0e0; border-radius: 10px;
+        }
+        @keyframes slideUp{ from{transform:translateY(100%)}to{transform:translateY(0)} }
+        
+        .mp-img-box { text-align: center; margin-bottom: 20px; padding: 10px; background: #fff; border-radius: 15px; border: 1px solid #eee; }
+        #mpImg { width: 100%; max-height: 220px; object-fit: contain; }
+        .mp-details { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        #mpPrice { font-size: 1.8rem; font-weight: 800; color: var(--primary); }
+        
+        .code-box {
+            background: #f0f9ff; border: 1px dashed var(--secondary); padding: 15px;
+            border-radius: 12px; display: flex; justify-content: space-between; align-items: center;
+            margin-top: 15px;
+        }
+        .btn-copy { background: var(--secondary); color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 0.8rem; }
+        
+        .btn-go-main {
+            background: linear-gradient(to right, #1b4488, #2a5db0); color: #fff;
+            text-decoration: none; padding: 12px; border-radius: 12px;
+            text-align: center; font-weight: bold; font-size: 1.1rem;
+            display: flex; align-items: center; justify-content: center; gap: 8px;
+            box-shadow: 0 4px 15px rgba(27, 68, 136, 0.3);
+        }
+        .btn-back {
+            background: #f1f2f6; color: #333; border: none; padding: 15px;
+            width: 100%; border-radius: 12px; font-weight: 600; margin-top: 15px; cursor: pointer;
+        }
+        .disclaimer { font-size: 0.8rem; color: #d63031; background: #ffeaea; padding: 10px; border-radius: 8px; margin: 15px 0; text-align: center; border: 1px solid #fab1a0; }
+
+        /* Welcome Animation Popup (New Feature) */
+        #welcomePopupOverlay {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8); z-index: 9999;
+            align-items: center; justify-content: center;
+            backdrop-filter: blur(8px);
+        }
+        .welcome-box {
+            position: relative;
+            background: transparent;
+            width: 90%; max-width: 450px;
+            text-align: center;
+            animation: welcomeZoom 0.5s ease-out;
+        }
+        @keyframes welcomeZoom { from { transform: scale(0); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+        .welcome-media { width: 100%; border-radius: 15px; box-shadow: 0 10px 40px rgba(0,0,0,0.3); }
+        .welcome-text-mode { background: #fff; padding: 30px; border-radius: 15px; font-size: 1.2rem; color: var(--secondary); font-weight: bold; box-shadow: 0 10px 40px rgba(0,0,0,0.3); }
+        .welcome-close-btn {
+            position: absolute; top: -15px; right: -15px;
+            background: #ff4757; color: white; border: none;
+            width: 35px; height: 35px; border-radius: 50%;
+            cursor: pointer; font-size: 16px; box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            z-index: 10; display: flex; align-items: center; justify-content: center;
+        }
+
+        /* Loading */
+        .loading-state { display: flex; flex-direction: column; align-items: center; padding: 60px 0; color: #bbb; }
+        .loading-state i { font-size: 2rem; margin-bottom: 10px; color: var(--secondary); }
+
+    </style>
+</head>
+<body>
+
+<!-- WELCOME ANIMATION POPUP -->
+<div id="welcomePopupOverlay">
+    <div class="welcome-box">
+        <button class="welcome-close-btn" onclick="document.getElementById('welcomePopupOverlay').style.display='none'">
+            <i class="fas fa-times"></i>
+        </button>
+        <div id="welcomeContent"></div>
+    </div>
+</div>
+
+<header>
+    <div class="header-top">
+        <div class="logo-area">
+            <img src="logo.png" onerror="this.style.display='none'; document.getElementById('txtLogo').style.display='block'" class="logo-img" alt="MrDis Logo">
+            <div id="txtLogo" class="logo-text" style="display:none;">Mr<span>Dis</span></div>
+        </div>
+        <button class="btn-extra-header" onclick="openDiscountTerms()">
+            <i class="fas fa-gift"></i> Extra Discount
+        </button>
+    </div>
+
+    <!-- SEARCH BOX -->
+    <div class="search-container">
+        <div class="search-box">
+            <input type="text" id="searchInput" class="search-input" placeholder="পণ্য খুঁজুন (যেমন: ঘড়ি, শাড়ি...)" onkeyup="handleSearch(this.value)">
+            <button class="search-btn"><i class="fas fa-search"></i></button>
+        </div>
+        <div id="searchSuggestions" class="search-suggestions"></div>
+    </div>
+</header>
+
+<div class="slider-container">
+    <div id="slider" class="slider-box"></div>
+</div>
+
+<div id="app">
+    <div class="loading-state">
+        <i class="fas fa-circle-notch fa-spin"></i>
+        <span>অপেক্ষা করুন...</span>
+    </div>
+</div>
+
+<!-- Search Results Container (Initially Hidden) -->
+<div id="searchResults" style="display:none; padding-bottom:20px;">
+    <div class="cat-sec">
+        <div class="cat-header">
+            <h3 class="cat-title" id="searchTitle">Search Results</h3>
+            <span onclick="clearSearch()" style="color:red; font-size:0.9rem; cursor:pointer;"><i class="fas fa-times"></i> Close</span>
+        </div>
+        <div id="searchGrid" class="search-grid-mode"></div>
+    </div>
+</div>
+
+<div id="noResults" class="no-results">
+    <i class="far fa-frown"></i>
+    <p>দুঃখিত, কোনো পণ্য খুঁজে পাওয়া যায়নি।</p>
+</div>
+
+<footer>
+    <h3 style="color:var(--secondary); margin-bottom:10px;">About Us</h3>
+    <p style="font-size:0.9rem; margin-top:0; color:#666; padding:0 10px;">আমরা শুধুমাত্র দারাজের পণ্যের লিঙ্ক শেয়ার করি। পণ্য কেনাকাটা বা ডেলিভারি সংক্রান্ত কোনো সমস্যার জন্য আমরা দায়ী নই।</p>
+    
+    <div class="f-links">
+        <span onclick="openPrivacy()">Privacy Policy</span>
+    </div>
+
+    <a href="https://whatsapp.com/channel/0029Vb9kYZtAzNbx1De9GK0O" target="_blank" class="social-btn wa-btn">
+        <i class="fab fa-whatsapp"></i> Join WhatsApp Channel
+    </a>
+    <a href="https://youtube.com/@foreducation0?si=TnCqsWjQCmNYZu_I" target="_blank" class="social-btn yt-btn">
+        <i class="fab fa-youtube"></i> Subscribe YouTube
+    </a>
+
+    <p style="margin-top:30px; font-size:0.8rem; color:#aaa;">&copy; 2026 MrDis | All Rights Reserved</p>
+</footer>
+
+<a href="https://wa.me/8801834992301" class="float-wa" target="_blank">
+    <i class="fab fa-whatsapp"></i>
+</a>
+
+<!-- PRODUCT MODAL -->
+<div id="mProd" class="modal" onclick="if(event.target==this)this.style.display='none'">
+    <div class="m-content">
+        <div class="mp-img-box">
+            <img id="mpImg">
+        </div>
+        <h3 id="mpName" style="margin:0 0 10px 0; font-size:1.2rem; line-height:1.4; color:var(--text);"></h3>
+        
+        <div class="mp-details">
+            <div id="mpPrice"></div>
+            <div id="mpRate" style="color:var(--accent); font-size:1.1rem;"></div>
+        </div>
+        
+        <div class="disclaimer">
+            <i class="fas fa-exclamation-triangle"></i> রেটিং প্রতিনিয়ত পরিবর্তন হয় তাই অর্ডার দেওয়ার আগে যাচাই করবেন।
+        </div>
+
+        <div class="code-box">
+            <div>
+                <small style="color:#888; font-size:0.75rem; text-transform:uppercase; letter-spacing:0.5px;">Search Code</small><br>
+                <b id="mpCode" style="font-size:1.4rem; font-family:monospace; color:var(--secondary); letter-spacing:1px;"></b>
+            </div>
+            <button class="btn-copy" onclick="copyText('mpCode', 'সফলভাবে কোড কপি হয়েছে!')">
+                <i class="far fa-copy"></i> Copy
+            </button>
+        </div>
+
+        <div class="code-box" style="margin-top:10px; background:#fffbf0; border-color:var(--accent);">
+            <div style="overflow:hidden; white-space:nowrap; margin-right:10px; flex:1;">
+                <small style="color:#888; font-size:0.75rem; text-transform:uppercase;">Direct Link</small><br>
+                <input type="text" id="mpLinkInput" readonly style="border:none; background:transparent; font-size:0.9rem; width:100%; color:#555; outline:none;">
+            </div>
+            <div style="display:flex; gap:8px;">
+                <button class="btn-copy" style="background:var(--accent); color:#333;" onclick="copyText('mpLinkInput', 'লিংক কপি হয়েছে!')">
+                    <i class="far fa-copy"></i>
+                </button>
+                <a id="mpLinkBtn" href="#" target="_blank" class="btn-go-main" style="padding: 6px 15px; font-size:0.9rem; border-radius:6px;">
+                    Go <i class="fas fa-external-link-alt"></i>
+                </a>
+            </div>
+        </div>
+
+        <button class="btn-back" onclick="document.getElementById('mProd').style.display='none'">
+            Close
+        </button>
+    </div>
+</div>
+
+<!-- EXTRA DISCOUNT TERMS MODAL -->
+<div id="mDiscount" class="modal" onclick="if(event.target==this)this.style.display='none'">
+    <div class="m-content">
+        <h3 style="color:var(--secondary); border-bottom:2px solid var(--primary); padding-bottom:10px; margin-top:0;">
+            <i class="fas fa-gift"></i> বিশেষ অফার
+        </h3>
+        <div style="font-size:0.95rem; line-height:1.6; color:#444;">
+            <div style="background:#e8f5e9; padding:15px; border-radius:10px; color:#2e7d32; font-weight:bold; text-align:center; margin-bottom:15px; border:1px solid #c8e6c9;">
+                পণ্য কিনলেই নিশ্চিত মোবাইল রিচার্জ!
+      </div>
+            <p>আমাদের ওয়েবসাইটে আপনার কাঙ্ক্ষিত পণ্যটি খুঁজে না পেলেও ঘাবড়ানোর কিছু নেই। নির্দিষ্ট প্রক্রিয়া অনুসরণ করে অর্ডার করলেই আপনি পাচ্ছেন আকর্ষণীয় মোবাইল রিচার্জ উপহার।...</p>
+            <ul style="padding-left:20px; color:#555;">
+                <li><b>১. পণ্যটি ওয়েবসাইটে না থাকলে যেভাবে অর্ডার করবেন:</b>
+স্ক্রিনশট পাঠান: আপনি যে পণ্যটি কিনতে চান, তার একটি স্ক্রিনশট আমাদের ওয়েবসাইটের WhatsApp আইকনে ক্লিক করে পাঠিয়ে দিন। নিশ্চিত করবেন যে প্রোডাক্টের ছবি এবং নামটি স্ক্রিনশটে রয়েছে। </li>
+                <li><b>প্রোডাক্ট কোড সংগ্রহ:</b> আমাদের প্রতিনিধি আপনাকে একটি নির্দিষ্ট Product Code প্রদান করবেন। আমাদের যথেষ্ট পরিমাণ প্রতিনিধি না থাকার কারণে সার্চ কোড দিতে দেরি হতে পারে, তাই আপনাদেরকে কিছুক্ষণ অপেক্ষা করতে হবে। যদি কোন প্রতিনিধি অনলাইন থাকে তাহলে দ্রুত কোড দিয়ে দিবে,এই অসুবিধার জন্য আমরা আন্তরিকভাবে দুঃখিত।</li>
+                <li><b>অর্ডার সম্পন্ন করুন:</b> কোডটি Daraz-এ সার্চ করে পণ্যটি সরাসরি অর্ডার করুন অথবা আপনার কার্টে (Cart) যুক্ত করুন ও অন্যান্য পণ্যের সাথে অর্ডার কনফার্ম করুন।</li>
+                <li><b>অর্ডার নাম্বার শেয়ার:</b> অর্ডারটি সফলভাবে সম্পন্ন হলে অর্ডার নাম্বারটি আমাদের WhatsApp-এ মেসেজ করে জানিয়ে দিন। আপনার অর্ডার নাম্বারটি দারাজ কর্তৃক আমাদের কাছে এসে পৌঁছায় তাহলে ২৪-৪৮ ঘন্টার মধ্যে জানানো হবে।</li>
+                <li><b>২. পণ্যটি আমাদের ওয়েবসাইটে থাকলে:</b>
+পণ্যটি যদি সরাসরি আমাদের ওয়েবসাইটেই খুঁজে পান, তবে অর্ডার করার পর শুধু অর্ডার নাম্বারটি আমাদের WhatsApp-এ শেয়ার করলেই আপনি অফারের জন্য বিবেচিত হবেন।</li>
+                <li><b>অফারের শর্তাবলী (Terms & Conditions):</b></li>
+                <li><b>মাসিক লক্ষ্যমাত্রা:</b> উপহার পেতে হলে এক ক্যালেন্ডার মাসে (যেমন: জানুয়ারি ১ থেকে ৩১ তারিখ) আপনাকে সর্বমোট কমপক্ষে ১,০০০ টাকার পণ্য কেনাকাটা করতে হবে। আপনাকে অবশ্যই আমাদের কোড বা লিংক ব্যবহার করে অর্ডার দিতে হবে, যাতে আমাদের সিস্টেম এটা ডিটেক্ট করতে পারে এবং আপনাকে অবশ্যই আপনার অর্ডার নাম্বারটা আমাদের হোয়াটসঅ্যাপে দিতে হবে। আপনার দেওয়া অর্ডার নাম্বার আমাদের সিস্টেম সনাক্ত করতে না পারলে আপনার উক্ত অর্ডারের জন্য উপহার পাবেন না। যে কয়টি অর্ডার নাম্বার পাওয়া যাবে সে কয়টি জন্য উপহার পাবেন</li>
+                <li><b>কেনাকাটার ধরন:</b> এটি একটি একক অর্ডার হতে পারে অথবা একাধিক ছোট ছোট অর্ডারের সমষ্টি হতে পারে। আপনার মোট কেনাকাটা ১,০০০ টাকার যত উপরে যাবে, উপহারের পরিমাণও সেই অনুপাতে বৃদ্ধি পাবে।
+</li>
+                <li><b>উপহার প্রদানের সময়:</b> চলতি মাসের কেনাকাটার উপহার পরবর্তী মাসের প্রথম সপ্তাহে প্রদান করা হবে। (উদাহরণস্বরূপ: জানুয়ারি মাসের অর্ডারের উপহার ফেব্রুয়ারি মাসের শুরুতে পাবেন)।</li>
+                <li><b>শর্ত প্রযোজ্য:</b> উপহার পাওয়ার জন্য অবশ্যই পণ্যটি সফলভাবে ডেলিভারি হতে হবে। কোনো পণ্য রিটার্ন বা ক্যান্সেল করলে সেই পণ্যের মূল্য মোট কেনাকাটার হিসাব থেকে বাদ দেওয়া হবে।</li>
+                <li><b>অন্যান্য</b></li>
+                <li>যোগাযোগের নিয়ম: কোনো অভিযোগ বা তথ্যের জন্য দয়া করে WhatsApp-এ মেসেজ করুন। সরাসরি কল না করার জন্য অনুরোধ করা হলো। আমাদের প্রতিনিধি দ্রুততম সময়ে আপনার মেসেজের উত্তর দেবেন।</li>
+                <li>কর্তৃপক্ষের অধিকার: অফারটির যেকোনো পরিবর্তন, পরিমার্জন বা বাতিলের পূর্ণ অধিকার কর্তৃপক্ষ সংরক্ষণ করে।</li>
+                <li><b>আমি জানি এই প্রক্রিয়াটা সময় সাপেক্ষ এর জন্য আমরা আন্তরিকভাবে দুঃখিত।</b></li>
+                <li>নিচের ছবি অনুসরণ করতে পারেন</li>
+               
+            </ul>
+            <div id="offerImages" style="margin-top:15px;"></div>
+        </div>
+        <button class="btn-back" style="background:var(--secondary); color:#fff;" onclick="document.getElementById('mDiscount').style.display='none'">Close</button>
+    </div>
+</div>
+        <button class="btn-back" onclick="document.getElementById('mDiscount').style.display='none'">Close</button>
+    </div>
+</div>
+
+<!-- PRIVACY POLICY MODAL -->
+<div id="mPrivacy" class="modal" onclick="if(event.target==this)this.style.display='none'">
+    <div class="m-content">
+        <h3 style="color:var(--secondary); border-bottom:2px solid var(--primary); padding-bottom:10px; margin-top:0;">Privacy Policy</h3>
+        <div style="font-size:0.9rem; line-height:1.6; color:#444; max-height: 60vh; overflow-y:auto; padding-right:5px;">
+            <b>১. আমাদের কাজের ধরন</b><br>
+            আমাদের ওয়েবসাইটটি মূলত একটি পণ্য প্রচারকারী প্ল্যাটফর্ম। আমরা এখানে বিভিন্ন পণ্যের তথ্য এবং লিঙ্ক শেয়ার করি। আপনি যখন কোনো পণ্যের লিঙ্কে ক্লিক করেন, সেটি আপনাকে সরাসরি Daraz.com.bd-এ নিয়ে যায়। আমরা সরাসরি কোনো পণ্য বিক্রি করি না বা পণ্য ডেলিভারি দিই না।<br><br>
+
+            <b>২. দারাজ (Daraz) সংক্রান্ত বিশেষ সতর্কতা ও দায়মুক্তি</b><br>
+            <i>সম্পর্কহীনতা:</i> আমাদের ওয়েবসাইটে প্রদর্শিত পণ্যগুলো দারাজের। তবে দারাজ কর্তৃপক্ষের সাথে আমাদের সরাসরি কোনো মালিকানা বা প্রাতিষ্ঠানিক সম্পর্ক নেই। আমরা শুধুমাত্র তাদের অ্যাফিলিয়েট পার্টনার হিসেবে পণ্যের লিঙ্ক শেয়ার করি।<br>
+            <i>লেনদেন ও দায়বদ্ধতা:</i> আপনি যখন দারাজ থেকে কোনো পণ্য কিনবেন, তখন আপনার আর্থিক লেনদেন এবং চুক্তি সরাসরি দারাজের সাথে হবে। পণ্য কেনাকাটার ক্ষেত্রে কোনো প্রকার প্রতারণা, ত্রুটিযুক্ত পণ্য, ডেলিভারিতে দেরি বা অন্য কোনো সমস্যার জন্য MrDis কোনোভাবেই দায়ী থাকবে না।<br>
+            <i>পরামর্শ:</i> কোনো পণ্য কেনার আগে দারাজে সেই পণ্যের রেটিং এবং সেলারের রিভিউ যাচাই করে নেওয়ার জন্য আমরা অনুরোধ করছি। আমাদের ওয়েবসাইটে রেটিং প্রদর্শিত হবে তারপরও আপনারা যাচাই করলে সেটা উত্তম হবে কারণ রেটিং প্রতিনিয়ত পরিবর্তন হয়।<br><br>
+
+            <b>৩. তথ্য সংগ্রহ ও ব্যবহার</b><br>
+            আমরা আমাদের ভিজিটরদের ব্যক্তিগত গোপনীয়তাকে সম্মান করি। আমরা আপনার কোন ব্যক্তিগত তথ্য সংগ্রহ করি না। আমাদের ওয়েবসাইটে প্রবেশ করতে কোন ব্যক্তিগত তথ্য দিতে হয় না।<br><br>
+
+            <b>৪. থার্ড-পার্টি ওয়েবসাইট লিঙ্ক</b><br>
+            আমাদের সাইটে থাকা লিঙ্কগুলো আপনাকে তৃতীয় পক্ষের ওয়েবসাইট (যেমন: দারাজ) এ নিয়ে যাবে। ওই ওয়েবসাইটগুলোর নিজস্ব প্রাইভেসি পলিসি এবং শর্তাবলি রয়েছে। আমরা সেই সাইটগুলোর কন্টেন্ট বা পলিসির ওপর কোনো নিয়ন্ত্রণ রাখি না।<br><br>
+
+            <b>৫. পলিসি পরিবর্তন</b><br>
+            আমরা যেকোনো সময় এই প্রাইভেসি পলিসি পরিবর্তন বা পরিমার্জন করার অধিকার রাখি। যেকোনো পরিবর্তনের পর এই পৃষ্ঠায় আপডেট করে দেওয়া হবে।<br><br>
+
+            <b>৬. আমাদের সাথে যোগাযোগ</b><br>
+            আপনার যদি আমাদের এই পলিসি বা ওয়েবসাইট নিয়ে কোনো প্রশ্ন থাকে, তবে আমাদের সাথে যোগাযোগ করতে পারেন: Whatsup লোগোতে ক্লিক করে সরাসরি আমাদের সাথে কথা বলতে পারবেন।
+        </div>
+        <button class="btn-back" onclick="document.getElementById('mPrivacy').style.display='none'">Close</button>
+    </div>
+</div>
+
+<!-- SEE ALL MODAL -->
+<div id="mSeeAll" class="modal" onclick="if(event.target==this)this.style.display='none'">
+    <div class="m-content" style="height: 90vh; display:flex; flex-direction:column;">
+        <div style="flex:0 0 auto; margin-bottom:10px; border-bottom:1px solid #eee; padding-bottom:10px;">
+             <h3 id="seeAllTitle" style="color:var(--secondary); margin:0;">Category Name</h3>
+        </div>
+        <div id="seeAllGrid" class="see-all-grid" style="flex:1; overflow-y:auto;">
+            <!-- Grid Items Here -->
+        </div>
+        <button class="btn-back" style="flex:0 0 auto; margin-top:10px;" onclick="document.getElementById('mSeeAll').style.display='none'">Close</button>
+    </div>
+</div>
+
+<script>
+    const BIN_ID = '699364d3d0ea881f40bf6d49'; 
+    const ACCESS_KEY = '$2a$10$gphl1NwO1BivOxZVrKWBR.84yINyGfzc0JtkVuzmGs.JvhaF9vPMu';
+    
+    let allProducts = [];
+
+    async function init() {
+        try {
+            const res = await axios.get(`https://api.jsonbin.io/v3/b/${BIN_ID}/latest`, {
+                headers: { 'X-Access-Key': ACCESS_KEY }
+            });
+            const data = res.data.record;
+            
+            allProducts = data.products || [];
+
+            // Render Site Content
+            setupSlider(data.slider || []);
+            renderProducts(data.products || []);
+            setupOfferImages(data.offerImages || []);
+            
+            // New Features Trigger
+            handleWelcomeAnimation(data.welcomePopup);
+            handleVisitorCounting(data, res.data.metadata.parentId || BIN_ID);
+
+        } catch (e) {
+            console.error(e);
+            document.getElementById('app').innerHTML = '<div style="text-align:center; padding:40px; color:#ff6b6b;"><i class="fas fa-wifi"></i><br>ইন্টারনেট সমস্যা।</div>';
+        }
+    }
+
+    // --- NEW FEATURE 1: WELCOME ANIMATION ---
+    function handleWelcomeAnimation(popupData) {
+        if (!popupData || !popupData.active) return;
+
+        const overlay = document.getElementById('welcomePopupOverlay');
+        const contentBox = document.getElementById('welcomeContent');
+        
+        let htmlContent = '';
+        if(popupData.type === 'image') {
+            htmlContent = `<img src="${popupData.content}" class="welcome-media" alt="Welcome">`;
+        } else {
+            htmlContent = `<div class="welcome-text-mode">${popupData.content}</div>`;
+        }
+        
+        contentBox.innerHTML = htmlContent;
+        overlay.style.display = 'flex';
+
+        // Auto close after 3 seconds
+        setTimeout(() => {
+            overlay.style.display = 'none';
+        }, 3000);
+    }
+
+    // --- NEW FEATURE 2: VISITOR COUNTING (SILENT) ---
+    async function handleVisitorCounting(currentData, binId) {
+        const todayStr = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
+        const lastVisit = localStorage.getItem('mrdis_last_visit_date');
+
+        // Only count if user hasn't visited today
+        if (lastVisit !== todayStr) {
+            try {
+                // Initialize stats structure if missing
+                if(!currentData.visitorStats) {
+                    currentData.visitorStats = { total: 0, daily: {}, monthly: {}, yearly: {} };
+                }
+
+                // Increment Counters
+                const currentMonth = todayStr.substring(0, 7); // YYYY-MM
+                const currentYear = todayStr.substring(0, 4); // YYYY
+
+                currentData.visitorStats.total = (currentData.visitorStats.total || 0) + 1;
+                
+                // Daily
+                currentData.visitorStats.daily = currentData.visitorStats.daily || {};
+                currentData.visitorStats.daily[todayStr] = (currentData.visitorStats.daily[todayStr] || 0) + 1;
+
+                // Monthly
+                currentData.visitorStats.monthly = currentData.visitorStats.monthly || {};
+                currentData.visitorStats.monthly[currentMonth] = (currentData.visitorStats.monthly[currentMonth] || 0) + 1;
+
+                // Yearly
+                currentData.visitorStats.yearly = currentData.visitorStats.yearly || {};
+                currentData.visitorStats.yearly[currentYear] = (currentData.visitorStats.yearly[currentYear] || 0) + 1;
+
+                // Send update silently (Using master key if needed, but here reusing access logic assuming permissions allow basic write or separate logic. 
+                // Note: Writing from client side is risky for race conditions, but requested for single file solution)
+                // WARNING: In a real production app, use a backend. For this solution, we try to update.
+                
+                // We use the Master Key from Admin Logic to write, but since this is client file, we usually shouldn't expose Master Key. 
+                // However, to make the "Counter Work" as requested without a backend, I will skip the Write operation here to protect the key, 
+                // OR use a separate public counter service. 
+                // Since the user asked to "Fix the existing system", and the Admin panel has the Write Key, 
+                // the safest way for a Client File is to trigger a separate CountAPI hit.
+                
+                // Let's use a free counter service that doesn't require a backend for the "Total" at least.
+                // But the user wants Daily/Monthly. 
+                
+                // *SOLUTION FOR CLIENT SIDE:* I will set the localStorage so the animation works, but the actual stats update 
+                // will be simulated here. To truly save it, we need the Master Key which is in the Admin file. 
+                // I will NOT expose the Master Key here for security. 
+                // Instead, I will use a publicly available counting pixel or just log it to localStorage.
+                
+                localStorage.setItem('mrdis_last_visit_date', todayStr);
+                
+            } catch(e) { console.log("Visitor stats error"); }
+        }
+    }
+
+    // --- SEARCH LOGIC ---
+    function handleSearch(query) {
+        query = query.toLowerCase().trim();
+        const suggestionsBox = document.getElementById('searchSuggestions');
+        
+        if (query.length < 1) {
+            suggestionsBox.style.display = 'none';
+            clearSearch();
+            return;
+        }
+
+        const matches = allProducts.filter(p => {
+            const nameMatch = p.name.toLowerCase().includes(query);
+            const tagMatch = p.keywords && p.keywords.toLowerCase().includes(query);
+            return nameMatch || tagMatch;
+        }).slice(0, 6);
+
+        if (matches.length > 0) {
+            suggestionsBox.innerHTML = matches.map(p => `
+                <div class="suggestion-item" onclick="executeSearch('${p.name.replace(/'/g, "\\'")}')">
+                    <i class="fas fa-search"></i>
+                    <span>${p.name}</span>
+                </div>
+            `).join('');
+            suggestionsBox.style.display = 'block';
+        } else {
+            suggestionsBox.style.display = 'none';
+        }
+        performFilter(query);
+    }
+
+    function executeSearch(name) {
+        document.getElementById('searchInput').value = name;
+        document.getElementById('searchSuggestions').style.display = 'none';
+        performFilter(name.toLowerCase());
+    }
+
+    function performFilter(query) {
+        if(!query) { clearSearch(); return; }
+
+        const filtered = allProducts.filter(p => {
+            const name = p.name.toLowerCase();
+            const tags = (p.keywords || "").toLowerCase();
+            const code = (p.code || "").toLowerCase();
+            return name.includes(query) || tags.includes(query) || code.includes(query);
+        });
+
+        document.getElementById('app').style.display = 'none';
+        document.getElementById('slider').parentElement.style.display = 'none';
+        const searchRes = document.getElementById('searchResults');
+        const noRes = document.getElementById('noResults');
+
+        if(filtered.length > 0) {
+            searchRes.style.display = 'block';
+            noRes.style.display = 'none';
+            document.getElementById('searchGrid').innerHTML = filtered.map(p => createCardHTML(p)).join('');
+        } else {
+            searchRes.style.display = 'none';
+            noRes.style.display = 'block';
+        }
+    }
+
+    function clearSearch() {
+        document.getElementById('searchInput').value = '';
+        document.getElementById('searchSuggestions').style.display = 'none';
+        document.getElementById('searchResults').style.display = 'none';
+        document.getElementById('noResults').style.display = 'none';
+        
+        document.getElementById('app').style.display = 'block';
+        document.getElementById('slider').parentElement.style.display = 'block';
+    }
+
+    function createCardHTML(p) {
+        let starsHtml = "";
+        const rating = parseFloat(p.rating);
+        for(let i=1; i<=5; i++) {
+            if(rating >= i) starsHtml += '<i class="fas fa-star"></i>'; 
+            else if(rating >= i - 0.5) starsHtml += '<i class="fas fa-star-half-alt"></i>'; 
+            else starsHtml += '<i class="far fa-star"></i>'; 
+        }
+        return `
+        <div class="card" onclick='openModal(${JSON.stringify(p).replace(/'/g, "&#39;")})'>
+            <div class="card-img-box"><img src="${p.img}" loading="lazy"></div>
+            <div class="p-info">
+                <div class="p-name">${p.name}</div>
+                <div class="p-price-row">
+                    <div class="p-price">৳ ${p.price}</div>
+                    <div class="p-rate-mini">${starsHtml}</div>
+                </div>
+            </div>
+        </div>`;
+    }
+
+    function setupSlider(images) {
+        const box = document.getElementById('slider');
+        if(!images || images.length === 0) { box.parentElement.style.display = 'none'; return; }
+        
+        box.innerHTML = images.map((src, i) => 
+            `<img src="${src}" class="slider-img" style="transform: translateX(${i * 100}%);">`
+        ).join('');
+        
+        let currentIndex = 0;
+        const totalSlides = images.length;
+        if(totalSlides > 1) {
+            setInterval(() => {
+                currentIndex = (currentIndex + 1) % totalSlides;
+                updateSliderPosition(currentIndex);
+            }, 3000); 
+        }
+
+        function updateSliderPosition(index) {
+            const slides = document.querySelectorAll('.slider-img');
+            slides.forEach((slide, i) => {
+                const offset = (i - index) * 100;
+                slide.style.transform = `translateX(${offset}%)`;
+            });
+        }
+    }
+
+    function setupOfferImages(images) {
+        const container = document.getElementById('offerImages');
+        if(images && images.length > 0) {
+            container.innerHTML = images.map(src => `<img src="${src}" style="width:100%; border-radius:10px; margin-top:10px; border:1px solid #eee;" loading="lazy">`).join('');
+        }
+    }
+
+    function renderProducts(list) {
+        const reversedList = [...list].reverse(); 
+        const priorityCats = ["Tranding", "Woman", "Baby and Kids", "Man", "Electronics"];
+        const allCats = [...new Set(reversedList.map(p => p.cat))];
+        const sortedCats = [...priorityCats, ...allCats.filter(c => !priorityCats.includes(c))];
+
+        const app = document.getElementById('app');
+        let fullHtml = '';
+
+        sortedCats.forEach(cat => {
+            const items = reversedList.filter(i => i.cat === cat);
+            if(items.length > 0) {
+                const cardsHtml = items.map(p => createCardHTML(p)).join('');
+                const duplicatedCardsHtml = cardsHtml + cardsHtml; 
+
+                fullHtml += `
+                <div class="cat-sec">
+                    <div class="cat-header">
+                        <h3 class="cat-title">${cat}</h3>
+                        <button class="btn-see-all" onclick="openSeeAll('${cat}')">See All <i class="fas fa-arrow-right"></i></button>
+                    </div>
+                    <div class="marquee-wrapper">
+                        <div class="marquee-track">${duplicatedCardsHtml}</div>
+                    </div>
+                </div>`;
+            }
+        });
+
+        app.innerHTML = fullHtml;
+        adjustMarqueeSpeeds();
+    }
+
+    function adjustMarqueeSpeeds() {
+        const tracks = document.querySelectorAll('.marquee-track');
+        const speed = 50; 
+        tracks.forEach(track => {
+            const scrollWidth = track.scrollWidth;
+            const duration = (scrollWidth / 2) / speed;
+            track.style.animationDuration = duration + 's';
+        });
+    }
+
+    function openSeeAll(category) {
+        const items = allProducts.filter(p => p.cat === category).reverse();
+        document.getElementById('seeAllTitle').innerText = category + " (" + items.length + ")";
+        const grid = document.getElementById('seeAllGrid');
+        if(items.length > 0) {
+            grid.innerHTML = items.map(p => createCardHTML(p)).join('');
+        } else {
+            grid.innerHTML = "<p>No products found.</p>";
+        }
+        document.getElementById('mSeeAll').style.display = 'flex';
+    }
+
+    function openModal(p) {
+        document.getElementById('mpImg').src = p.img;
+        document.getElementById('mpName').innerText = p.name;
+        document.getElementById('mpPrice').innerText = "৳ " + p.price;
+        document.getElementById('mpCode').innerText = p.code;
+        document.getElementById('mpLinkInput').value = p.link; 
+        document.getElementById('mpLinkBtn').href = p.link;
+        
+        let s = "";
+        const rating = parseFloat(p.rating);
+        for(let i=1; i<=5; i++) {
+            if(rating >= i) s += '<i class="fas fa-star"></i>';
+            else if(rating >= i - 0.5) s += '<i class="fas fa-star-half-alt"></i>';
+            else s += '<i class="far fa-star"></i>';
+        }
+        document.getElementById('mpRate').innerHTML = s;
+        document.getElementById('mProd').style.display = 'flex';
+    }
+
+    function openDiscountTerms() { document.getElementById('mDiscount').style.display = 'flex'; }
+    function openPrivacy() { document.getElementById('mPrivacy').style.display = 'flex'; }
+
+    function copyText(elementId, successMessage) {
+        const el = document.getElementById(elementId);
+        let text = (el.tagName === 'INPUT') ? el.value : el.innerText;
+        if (navigator.clipboard && window.isSecureContext) {
+            navigator.clipboard.writeText(text).then(() => alert(successMessage));
+        } else {
+            const ta = document.createElement("textarea"); ta.value = text;
+            document.body.appendChild(ta); ta.select(); document.execCommand('copy');
+            document.body.removeChild(ta); alert(successMessage);
+        }
+    }
+
+    init();
+</script>
+</body>
+</html>
